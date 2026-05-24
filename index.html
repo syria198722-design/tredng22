@@ -1,0 +1,1702 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> إشارات ابو قيصر الذكية | Mami Smart Signals</title>
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Socket.io Client CDN with local fallback -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script>
+        if (typeof io === 'undefined') {
+            document.write('<script src="http://localhost:5000/socket.io/socket.io.js"><\/script>');
+        }
+    </script>
+
+    <!-- TradingView Widget API -->
+    <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+
+    <!-- Google Fonts: Cairo & Orbitron for Cyber/Digital look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&family=Orbitron:wght@400;700;900&display=swap"
+        rel="stylesheet">
+
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cyberDark: '#0b0f19',
+                        panelDark: '#121826',
+                        accentCyan: '#06b6d4',
+                        accentBlue: '#3b82f6',
+                        signalBuy: '#10b981',
+                        signalSell: '#f43f5e',
+                    },
+                    fontFamily: {
+                        cairo: ['Cairo', 'sans-serif'],
+                        orbitron: ['Orbitron', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        cyberGlow: '0 0 20px rgba(6, 182, 212, 0.15)',
+                        buyGlow: '0 0 20px rgba(16, 185, 129, 0.2)',
+                        sellGlow: '0 0 20px rgba(244, 63, 94, 0.2)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: #0b0f19;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+
+        /* Digital numbers font */
+        .digital-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #0b0f19;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #06b6d4;
+        }
+
+        /* Glow effects */
+        .glow-cyan {
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.35);
+        }
+
+        .glow-green {
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.35);
+        }
+
+        .glow-red {
+            box-shadow: 0 0 15px rgba(244, 63, 94, 0.35);
+        }
+
+        /* Animation: Signal card entry */
+        @keyframes slideIn {
+            0% {
+                opacity: 0;
+                transform: translateY(-20px) scale(0.95);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .animate-signal-enter {
+            animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Animation: Pulse indicators */
+        @keyframes pulseGreen {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+            }
+        }
+
+        .pulse-indicator-green {
+            animation: pulseGreen 2s infinite;
+        }
+
+        @keyframes pulseRed {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7);
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+                box-shadow: 0 0 0 8px rgba(244, 63, 94, 0);
+            }
+        }
+
+        .pulse-indicator-red {
+            animation: pulseRed 2s infinite;
+        }
+
+        /* Animation: Grid gridline background effect */
+        .cyber-grid {
+            background-size: 40px 40px;
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+        }
+
+        /* Neon Scanning lines */
+        .scan-line {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #06b6d4, transparent);
+            animation: scan 3s linear infinite;
+        }
+
+        @keyframes scan {
+            0% {
+                transform: translateY(-100%);
+            }
+
+            100% {
+                transform: translateY(1000%);
+            }
+        }
+    </style>
+</head>
+
+<body class="cyber-grid min-h-screen flex flex-col">
+
+    <!-- Top Cyber Banner / Border decoration -->
+    <div class="h-1 w-full bg-gradient-to-l from-accentCyan via-accentBlue to-signalBuy shadow-cyberGlow"></div>
+
+    <!-- Header Section -->
+    <header
+        class="border-b border-slate-800/80 bg-cyberDark/90 backdrop-blur-md sticky top-0 z-50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+
+            <!-- Logo & Brand Title -->
+            <div class="flex items-center gap-3">
+                <div
+                    class="relative flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-accentCyan/20 to-accentBlue/20 border border-accentCyan/40 shadow-cyberGlow">
+                    <i class="fa-solid fa-chart-line text-accentCyan text-2xl"></i>
+                    <span
+                        class="absolute -top-1 -right-1 w-3 h-3 bg-signalBuy rounded-full pulse-indicator-green"></span>
+                </div>
+                <div>
+                    <h1
+                        class="text-xl sm:text-2xl font-black text-transparent bg-clip-text bg-gradient-to-l from-white via-slate-100 to-accentCyan tracking-wider flex items-center gap-2">
+                        <span>منصة إشارات ابو قيصر الذكية</span>
+                        <span
+                            class="text-xs font-bold text-accentCyan border border-accentCyan/30 px-2 py-0.5 rounded bg-accentCyan/10">v4.0
+                            PRO</span>
+                    </h1>
+                    <p class="text-xs text-slate-400 font-medium">مساعد التداول الثنائي والتحليل الفني في الوقت الفعلي
+                    </p>
+                </div>
+            </div>
+
+            <!-- Controls & Live Status Badges -->
+            <div class="flex flex-wrap items-center gap-3">
+
+                <!-- Demo Simulator Toggle (Highly Premium Feature) -->
+                <button onclick="simulateSignal()"
+                    class="flex items-center gap-2 bg-gradient-to-l from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold py-2 px-3.5 rounded-lg border border-cyan-400/30 transition duration-300 active:scale-95 shadow-lg shadow-cyan-900/30">
+                    <i class="fa-solid fa-wand-magic-sparkles animate-pulse"></i>
+                    <span>توليد إشارة تجريبية</span>
+                </button>
+
+                <!-- Connection Status Badge -->
+                <div id="connectionStatus"
+                    class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-semibold shadow-[0_0_10px_rgba(244,63,94,0.05)] transition-all duration-300">
+                    <span class="w-2.5 h-2.5 bg-rose-500 rounded-full pulse-indicator-red shrink-0"
+                        id="connectionDot"></span>
+                    <span id="connectionText">خادم غير متصل</span>
+                </div>
+
+                <!-- Mute / Unmute Sound Switch -->
+                <button id="soundToggle" onclick="toggleMute()"
+                    class="flex items-center justify-center gap-2 bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white px-3.5 py-2 rounded-lg border border-slate-700 transition duration-200 active:scale-95">
+                    <i id="soundIcon" class="fa-solid fa-volume-high text-accentCyan"></i>
+                    <span id="soundText" class="text-xs font-bold">الصوت: نشط</span>
+                </button>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl mx-auto w-full px-4 py-6 flex flex-col gap-6">
+
+        <!-- Stats Grid (Top Summary Cards) -->
+        <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+            <!-- Card 1: Total Signals Today -->
+            <div
+                class="relative overflow-hidden bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 flex items-center justify-between backdrop-blur-md shadow-cyberGlow group hover:border-accentCyan/40 transition duration-300">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-accentCyan/5 rounded-full blur-3xl -mr-6 -mt-6"></div>
+                <div class="flex flex-col gap-1 z-10">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">إشارات اليوم الكلية</span>
+                    <span id="totalSignalsCounter"
+                        class="text-4xl font-extrabold text-white digital-font tracking-wider">0</span>
+                    <span class="text-[10px] text-accentCyan flex items-center gap-1 font-semibold">
+                        <i class="fa-solid fa-arrows-spin animate-spin"></i>
+                        <span>تحديث تلقائي فوري</span>
+                    </span>
+                </div>
+                <div
+                    class="w-14 h-14 rounded-xl bg-accentCyan/10 border border-accentCyan/20 flex items-center justify-center text-accentCyan text-2xl group-hover:scale-110 transition duration-300">
+                    <i class="fa-solid fa-tower-broadcast"></i>
+                </div>
+            </div>
+
+            <!-- Card 2: Average Win Rate -->
+            <div
+                class="relative overflow-hidden bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 flex items-center justify-between backdrop-blur-md shadow-cyberGlow group hover:border-signalBuy/40 transition duration-300">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-signalBuy/5 rounded-full blur-3xl -mr-6 -mt-6"></div>
+                <div class="flex flex-col gap-1 z-10">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">معدل الفوز الفعلي</span>
+                    <div class="flex items-baseline gap-2">
+                        <span id="winRateOutput"
+                            class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-l from-signalBuy to-emerald-400 digital-font tracking-wider">0%</span>
+                        <span
+                            class="w-2.5 h-2.5 rounded-full bg-signalBuy pulse-indicator-green inline-block mb-1"></span>
+                    </div>
+                    <span id="winLossRatioOutput"
+                        class="text-[10px] text-slate-400 font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-shield-halved text-signalBuy"></i>
+                        <span>الرابحة: 0 | الخاسرة: 0</span>
+                    </span>
+                </div>
+                <div
+                    class="w-14 h-14 rounded-xl bg-signalBuy/10 border border-signalBuy/20 flex items-center justify-center text-signalBuy text-2xl group-hover:scale-110 transition duration-300">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+            </div>
+
+            <!-- Card 3: Market Status -->
+            <div
+                class="relative overflow-hidden bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 flex items-center justify-between backdrop-blur-md shadow-cyberGlow group hover:border-accentBlue/40 transition duration-300">
+                <div class="absolute top-0 right-0 w-24 h-24 bg-accentBlue/5 rounded-full blur-3xl -mr-6 -mt-6"></div>
+                <div class="flex flex-col gap-1 z-10">
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">حالة السوق العالمية</span>
+                    <div class="flex items-center gap-2">
+                        <span id="marketStatusText" class="text-xl font-bold text-white">نشط الآن</span>
+                        <span
+                            class="px-2 py-0.5 text-[10px] font-extrabold bg-accentBlue/10 border border-accentBlue/30 text-accentBlue rounded">OTC
+                            / مباشر</span>
+                    </div>
+                    <span id="activeSessions" class="text-[10px] text-slate-400 font-semibold flex items-center gap-1">
+                        <i class="fa-solid fa-clock"></i>
+                        <span>جلسة لندن / نيويورك مفعلة</span>
+                    </span>
+                </div>
+                <div
+                    class="w-14 h-14 rounded-xl bg-accentBlue/10 border border-accentBlue/20 flex items-center justify-center text-accentBlue text-2xl group-hover:scale-110 transition duration-300">
+                    <i class="fa-solid fa-globe"></i>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Content Panel (Two Columns Layout) -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- Right/Main Column (Signals list) - 7 cols on desktop -->
+            <div class="lg:col-span-7 flex flex-col gap-5 h-full">
+
+                <!-- Live Signals Header -->
+                <div
+                    class="bg-slate-950/40 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-md flex flex-col gap-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-accentCyan glow-cyan animate-pulse"></span>
+                            <h2 class="text-lg font-bold text-white">إشارات التداول الفورية</h2>
+                        </div>
+                        <span class="text-xs text-slate-400 flex items-center gap-1">
+                            <i class="fa-solid fa-bolt text-accentCyan"></i>
+                            <span>تحديث فوري فائق السرعة</span>
+                        </span>
+                    </div>
+
+                    <!-- Filter buttons and simulator options -->
+                    <div class="flex flex-wrap items-center gap-2 text-xs border-t border-slate-800/80 pt-4">
+                        <span class="text-slate-400 ml-2">تصفية حسب الاتجاه:</span>
+                        <button onclick="filterSignals('all')" id="filterBtn-all"
+                            class="px-3 py-1 rounded bg-slate-800 text-white border border-slate-700 hover:border-accentCyan/50 transition">الكل</button>
+                        <button onclick="filterSignals('BUY')" id="filterBtn-BUY"
+                            class="px-3 py-1 rounded bg-slate-900 text-slate-400 border border-slate-800 hover:border-signalBuy/50 transition">شراء
+                            فقط</button>
+                        <button onclick="filterSignals('SELL')" id="filterBtn-SELL"
+                            class="px-3 py-1 rounded bg-slate-900 text-slate-400 border border-slate-800 hover:border-signalSell/50 transition">بيع
+                            فقط</button>
+
+                        <div class="mr-auto flex items-center gap-2">
+                            <label class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="autoSimulateCheckbox" class="sr-only peer"
+                                    onchange="toggleAutoSimulation()">
+                                <div
+                                    class="relative w-9 h-5 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-accentCyan peer-checked:after:bg-white">
+                                </div>
+                                <span class="ms-2 text-xs font-medium text-slate-400">محاكاة تلقائية (15ث)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signals Cards Container -->
+                <div id="signalsContainer" class="flex flex-col gap-4 max-h-[600px] overflow-y-auto pr-1 pb-4">
+
+                    <!-- Empty State Placeholder (Animated scanline) -->
+                    <div id="noSignalsPlaceholder"
+                        class="relative overflow-hidden bg-slate-950/30 border border-slate-800/40 rounded-2xl p-12 text-center flex flex-col items-center justify-center gap-4">
+                        <div class="scan-line absolute top-0 left-0 w-full"></div>
+                        <div
+                            class="w-16 h-16 rounded-full bg-slate-900/80 border border-slate-800 flex items-center justify-center text-slate-600 text-3xl">
+                            <i class="fa-solid fa-satellite-dish animate-bounce"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-400">في انتظار الإشارات الجديدة...</h3>
+                            <p class="text-xs text-slate-600 mt-1 max-w-sm">يرجى تشغيل خادم WebSocket المحلي أو النقر
+                                على زر "توليد إشارة تجريبية" لمحاكاة وصول الإشارات فورياً.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <!-- Left Column (Calculator and Chart) - 5 cols on desktop -->
+            <div class="lg:col-span-5 flex flex-col gap-6">
+
+                <!-- Smart Technical Recommendation Analyzer -->
+                <div
+                    class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-md shadow-cyberGlow flex flex-col gap-4">
+                    <div class="flex items-center gap-2 border-b border-slate-800/80 pb-3">
+                        <i class="fa-solid fa-wand-magic-sparkles text-accentCyan text-lg"></i>
+                        <h2 class="text-base font-bold text-white">مخطط صفقات Pocket Option الموجه</h2>
+                    </div>
+
+                    <!-- Inputs -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="flex flex-col gap-1.5">
+                            <label for="customAssetSelect" class="text-xs font-bold text-slate-400">اختر زوج
+                                العملات:</label>
+                            <select id="customAssetSelect"
+                                class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl focus:border-accentCyan focus:ring-1 focus:ring-accentCyan text-white font-bold outline-none text-right"
+                                onchange="updateTradingViewWidget(this.value)">
+                                <option value="EUR/USD">EUR/USD (اليورو/دولار)</option>
+                                <option value="GBP/USD">GBP/USD (الباوند/دولار)</option>
+                                <option value="USD/JPY">USD/JPY (الدولار/ين)</option>
+                                <option value="AUD/USD">AUD/USD (الأسترالي/دولار)</option>
+                                <option value="USD/CAD">USD/CAD (الدولار/كندي)</option>
+                                <option value="EUR/JPY">EUR/JPY (اليورو/ين)</option>
+                                <option value="BTC/USD">BTC/USD (البيتكوين)</option>
+                                <option value="ETH/USD">ETH/USD (الإيثيريوم)</option>
+                            </select>
+                        </div>
+
+                        <div class="flex flex-col gap-1.5">
+                            <label for="customDurationSelect" class="text-xs font-bold text-slate-400">مدة الصفقة
+                                المطلوبة:</label>
+                            <select id="customDurationSelect"
+                                class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl focus:border-accentCyan focus:ring-1 focus:ring-accentCyan text-white font-bold outline-none text-right">
+                                <option value="1">دقيقة واحدة (1m)</option>
+                                <option value="2" selected>دقيقتان (2m)</option>
+                                <option value="5">5 دقائق (5m)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
+                        <label for="customDelaySelect" class="text-xs font-bold text-slate-400">توقيت دخول الصفقة
+                            والتحضير:</label>
+                        <select id="customDelaySelect"
+                            class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl focus:border-accentCyan focus:ring-1 focus:ring-accentCyan text-white font-bold outline-none text-right">
+                            <option value="1" selected>بعد دقيقة واحدة (موصى به للتحضير)</option>
+                            <option value="2">بعد دقيقتين</option>
+                            <option value="0">دخول فوري / الآن</option>
+                        </select>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button onclick="requestCustomAnalysis()"
+                        class="w-full py-2.5 px-4 bg-gradient-to-l from-accentCyan to-accentBlue hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-bold rounded-xl border border-cyan-400/30 transition duration-300 active:scale-98 shadow-lg shadow-cyan-950/20 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-magnifying-glass-chart text-sm"></i>
+                        <span>تحليل العملة واستخراج خطة الصفقة</span>
+                    </button>
+
+                    <!-- Loader (Hidden by default) -->
+                    <div id="analysisLoader"
+                        class="hidden flex flex-col gap-3 p-4 bg-slate-900/50 border border-slate-800 rounded-xl">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-slate-400 font-bold flex items-center gap-2">
+                                <i class="fa-solid fa-spinner animate-spin text-accentCyan"></i>
+                                <span>جاري فحص مؤشرات RSI, MACD, Stochastic لـ Pocket Option...</span>
+                            </span>
+                            <span id="analysisPercentText" class="digital-font text-accentCyan font-bold">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800">
+                            <div id="analysisProgressBar"
+                                class="h-full bg-accentCyan rounded-full transition-all duration-300" style="width: 0%">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Signal Result Display (Hidden by default) -->
+                    <div id="customSignalResult" class="hidden flex flex-col gap-3">
+                        <!-- Card containing result will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Risk Management Widget -->
+                <div
+                    class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-md shadow-cyberGlow flex flex-col gap-4">
+                    <div class="flex items-center gap-2 border-b border-slate-800/80 pb-3">
+                        <i class="fa-solid fa-calculator text-accentCyan text-lg"></i>
+                        <h2 class="text-base font-bold text-white">حاسبة إدارة المخاطر الذكية</h2>
+                    </div>
+
+                    <!-- Calculator Inputs -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-1.5">
+                            <label for="balanceInput" class="text-xs font-bold text-slate-400">رصيد الحساب ($):</label>
+                            <div class="relative">
+                                <span
+                                    class="absolute inset-y-0 start-0 flex items-center ps-3 text-slate-500 font-bold digital-font">$</span>
+                                <input type="number" id="balanceInput" value="100" min="1" step="1"
+                                    class="w-full pl-3 pr-8 py-2 bg-slate-900 border border-slate-800 rounded-xl focus:border-accentCyan focus:ring-1 focus:ring-accentCyan text-white digital-font font-bold outline-none text-left"
+                                    oninput="calculateRisk()">
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-1.5">
+                            <label for="riskInput" class="text-xs font-bold text-slate-400">نسبة المخاطرة (%):</label>
+                            <div class="relative">
+                                <span
+                                    class="absolute inset-y-0 end-0 flex items-center pe-3 text-slate-500 font-bold">%</span>
+                                <input type="number" id="riskInput" value="2.5" min="0.1" max="100" step="0.1"
+                                    class="w-full pl-8 pr-3 py-2 bg-slate-900 border border-slate-800 rounded-xl focus:border-accentCyan focus:ring-1 focus:ring-accentCyan text-white digital-font font-bold outline-none text-left"
+                                    oninput="calculateRisk()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-bold text-slate-400">مضاعف مارتينجال:</label>
+                            <select id="multiplierInput"
+                                class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl focus:border-accentCyan focus:ring-1 focus:ring-accentCyan text-white font-bold outline-none"
+                                onchange="calculateRisk()">
+                                <option value="2.2" selected>2.2x (موصى به)</option>
+                                <option value="2.3">2.3x</option>
+                                <option value="2.5">2.5x</option>
+                                <option value="2.0">2.0x (منخفض)</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-1.5">
+                            <label class="text-xs font-bold text-slate-400">عائد الصفقة المتوقع (%):</label>
+                            <input type="number" id="payoutInput" value="82" min="1" max="100"
+                                class="w-full px-3 py-2 bg-slate-900 border border-slate-800 rounded-xl focus:border-accentCyan focus:ring-1 focus:ring-accentCyan text-white digital-font font-bold outline-none text-left"
+                                oninput="calculateRisk()">
+                        </div>
+                    </div>
+
+                    <!-- Calculated Outputs -->
+                    <div
+                        class="bg-gradient-to-l from-slate-900 to-slate-900/50 rounded-xl p-4 border border-slate-800 flex items-center justify-between">
+                        <div>
+                            <p class="text-xs text-slate-400 font-semibold">مبلغ الصفقة الآمنة (الخطوة 1):</p>
+                            <p class="text-[10px] text-slate-500 mt-0.5">الحد الأقصى الموصى به للمركز الأول</p>
+                        </div>
+                        <div class="text-right">
+                            <span id="safeAmountOutput"
+                                class="text-2xl font-black text-accentCyan digital-font tracking-wider">$2.50</span>
+                        </div>
+                    </div>
+
+                    <!-- Martingale Guide Table -->
+                    <div class="flex flex-col gap-2 mt-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-bold text-slate-300">جدول مضاعفات مارتينجال للتعافي</span>
+                            <span class="text-[10px] text-rose-400 font-semibold flex items-center gap-1">
+                                <i class="fa-solid fa-circle-exclamation"></i>
+                                <span>الحد الأقصى 4 خطوات لتجنب تصفير الحساب</span>
+                            </span>
+                        </div>
+
+                        <div class="overflow-hidden rounded-xl border border-slate-800/80 bg-slate-900/50">
+                            <table class="w-full text-xs text-right">
+                                <thead class="bg-slate-900 text-slate-400 font-bold border-b border-slate-850">
+                                    <tr>
+                                        <th class="p-2.5 text-center">الخطوة</th>
+                                        <th class="p-2.5">المضاعف</th>
+                                        <th class="p-2.5 text-left">مبلغ الصفقة</th>
+                                        <th class="p-2.5 text-left">الربح الصافي المتوقع</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="martingaleTableBody" class="divide-y divide-slate-800/60 font-semibold">
+                                    <!-- Populated dynamically via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Live Technical Chart Widget -->
+                <div
+                    class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-md shadow-cyberGlow flex flex-col gap-4">
+                    <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-chart-area text-accentCyan"></i>
+                            <h2 class="text-base font-bold text-white">الرسم البياني المباشر (1 دقيقة)</h2>
+                        </div>
+                        <span id="chartSymbolBadge"
+                            class="px-2.5 py-0.5 text-xs font-bold bg-accentCyan/10 border border-accentCyan/30 text-accentCyan rounded-md digital-font">EURUSD</span>
+                    </div>
+
+                    <!-- TradingView Container -->
+                    <div class="w-full rounded-xl overflow-hidden border border-slate-800 bg-slate-900"
+                        style="height: 380px;">
+                        <div id="tradingview_chart" class="w-full h-full"></div>
+                    </div>
+
+                    <p class="text-[10px] text-slate-500 text-center leading-relaxed">
+                        <i class="fa-solid fa-circle-info ml-1 text-accentCyan"></i>
+                        يمكنك النقر فوق أي بطاقة إشارة في قائمة الإشارات لتحديث الرسم البياني المباشر للزوج المحدد
+                        تلقائياً.
+                    </p>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- Expired Signals History Log -->
+        <section
+            class="bg-slate-950/60 border border-slate-800/80 rounded-2xl p-5 backdrop-blur-md shadow-cyberGlow flex flex-col gap-4 mt-2">
+            <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-accentCyan"></i>
+                    <h2 class="text-base font-bold text-white">سجل الصفقات المنتهية (المغلقة)</h2>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                    <span class="text-slate-400">إجمالي الصفقات:</span>
+                    <span id="historyTotalCount" class="font-bold text-white digital-font mx-1">0</span>
+                    <span class="text-slate-700">|</span>
+                    <span class="text-emerald-400 mx-1">ربح:</span>
+                    <span id="historyWinCount" class="font-bold digital-font text-emerald-400">0</span>
+                    <span class="text-slate-700">|</span>
+                    <span class="text-rose-400 mx-1">خسارة:</span>
+                    <span id="historyLossCount" class="font-bold digital-font text-rose-400">0</span>
+                </div>
+            </div>
+
+            <!-- Table Container -->
+            <div
+                class="overflow-x-auto rounded-xl border border-slate-800/80 bg-slate-900/30 max-h-[300px] overflow-y-auto">
+                <table class="w-full text-xs text-right">
+                    <thead class="bg-slate-900 text-slate-400 font-bold border-b border-slate-800 sticky top-0 z-10">
+                        <tr>
+                            <th class="p-3 text-center">رقم الصفقة</th>
+                            <th class="p-3 text-center">الزوج</th>
+                            <th class="p-3 text-center">النوع</th>
+                            <th class="p-3 text-center">المدة</th>
+                            <th class="p-3 text-center">سعر الدخول</th>
+                            <th class="p-3 text-center">سعر الإغلاق</th>
+                            <th class="p-3 text-center">النتيجة</th>
+                            <th class="p-3 text-center">الوقت</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTableBody" class="divide-y divide-slate-800/40 text-slate-300 font-semibold">
+                        <tr id="emptyHistoryRow">
+                            <td colspan="8" class="p-8 text-center text-slate-500">لا توجد صفقات منتهية حالياً. سيتم
+                                إدراج الصفقات هنا بمجرد اكتمال عدها التنازلي.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="mt-auto border-t border-slate-900 bg-slate-950/95 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify    <!-- App JavaScript Logic -->
+    <script>
+        // App State
+        let isMuted = false;
+        let totalSignals = 0;
+        let activeFilter = 'all';
+        let socket = null;
+        let autoSimulateInterval = null;
+        let existingSignals = [];
+        
+        // Dynamic Outcomes and History State
+        let totalWins = 0;
+        let totalLosses = 0;
+        let expiredSignals = [];
+        let activeIntervals = {};
+
+        // Audio System Setup
+        const signalAudio = document.getElementById('signalAudio');
+
+        // Web Audio API Synthesizer Fallback in case of browser restrictions or network failure
+        function playAlertSound() {
+            if (isMuted) return;
+
+            // Attempt standard HTML5 Audio play
+            signalAudio.currentTime = 0;
+            const playPromise = signalAudio.play();
+
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.log(" HTML5 Audio playback prevented. Falling back to Web Audio API..."); // Synthesize
+            electronic sound with Web Audio API synthesizeSound(); }); } } // Web Audio Synthesizer (creates a premium
+            clean cyber chime) function synthesizeSound() { try { const AudioContext=window.AudioContext ||
+            window.webkitAudioContext; if (!AudioContext) return; const ctx=new AudioContext(); // Beep tone 1 (high
+            pitch start) const osc1=ctx.createOscillator(); const gain1=ctx.createGain(); osc1.type='sine' ;
+            osc1.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
+            osc1.frequency.exponentialRampToValueAtTime(987.77, ctx.currentTime + 0.15); // B5
+            gain1.gain.setValueAtTime(0.12, ctx.currentTime); gain1.gain.exponentialRampToValueAtTime(0.001,
+            ctx.currentTime + 0.35); osc1.connect(gain1); gain1.connect(ctx.destination); // Beep tone 2 (warm sub tone)
+            const osc2=ctx.createOscillator(); const gain2=ctx.createGain(); osc2.type='triangle' ;
+            osc2.frequency.setValueAtTime(329.63, ctx.currentTime); // E4 gain2.gain.setValueAtTime(0.08,
+            ctx.currentTime); gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+            osc2.connect(gain2); gain2.connect(ctx.destination); osc1.start(); osc2.start(); osc1.stop(ctx.currentTime +
+            0.4); osc2.stop(ctx.currentTime + 0.4); } catch (e) { console.error("Web Audio synthesis failed", e); } } //
+            Web Audio Synthesizer for countdown warning beep function playCountdownBeep() { if (isMuted) return; try {
+            const AudioContext=window.AudioContext || window.webkitAudioContext; if (!AudioContext) return; const
+            ctx=new AudioContext(); const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.type='sine' ;
+            osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 high beep gain.gain.setValueAtTime(0.08,
+            ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15); osc.connect(gain);
+            gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.15); } catch (e) {
+            console.error(e); } } // Web Audio Synthesizer for trade entry success chime function playEntryChime() { if
+            (isMuted) return; try { const AudioContext=window.AudioContext || window.webkitAudioContext; if
+            (!AudioContext) return; const ctx=new AudioContext(); const osc1=ctx.createOscillator(); const
+            gain1=ctx.createGain(); osc1.type='sine' ; osc1.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
+            osc1.frequency.exponentialRampToValueAtTime(1046.50, ctx.currentTime + 0.2); // C6
+            gain1.gain.setValueAtTime(0.1, ctx.currentTime); gain1.gain.exponentialRampToValueAtTime(0.001,
+            ctx.currentTime + 0.35); osc1.connect(gain1); gain1.connect(ctx.destination); osc1.start();
+            osc1.stop(ctx.currentTime + 0.35); } catch (e) { console.error(e); } } // Toggle Mute Audio function
+            toggleMute() { isMuted=!isMuted; const soundIcon=document.getElementById('soundIcon'); const
+            soundText=document.getElementById('soundText'); const soundToggleBtn=document.getElementById('soundToggle');
+            if (isMuted) { soundIcon.className="fa-solid fa-volume-xmark text-rose-500 animate-none" ;
+            soundText.innerText="الصوت: كتم" ; soundToggleBtn.classList.add('border-rose-900/30', 'bg-rose-950/10' ); }
+            else { soundIcon.className="fa-solid fa-volume-high text-accentCyan" ; soundText.innerText="الصوت: نشط" ;
+            soundToggleBtn.classList.remove('border-rose-900/30', 'bg-rose-950/10' ); // Play test sound
+            playAlertSound(); } } // Risk Calculator logic function calculateRisk() { const
+            balanceInput=document.getElementById('balanceInput'); const riskInput=document.getElementById('riskInput');
+            const multiplierInput=document.getElementById('multiplierInput'); const
+            payoutInput=document.getElementById('payoutInput'); const balance=parseFloat(balanceInput.value) || 0; const
+            riskPercent=parseFloat(riskInput.value) || 0; const multiplier=parseFloat(multiplierInput.value) || 2.2;
+            const payoutPercent=parseFloat(payoutInput.value) || 82; // Safe Trade amount (Step 1) const
+            safeAmount=(balance * (riskPercent / 100));
+            document.getElementById('safeAmountOutput').innerText=`$${safeAmount.toFixed(2)}`; // Populate Martingale
+            Guide Table const tbody=document.getElementById('martingaleTableBody'); tbody.innerHTML='' ; let
+            currentTradeAmount=safeAmount; let totalLossAccumulated=0; for (let step=1; step <=4; step++) { if (step> 1)
+            {
+            currentTradeAmount = currentTradeAmount * multiplier;
+            }
+
+            // If step fails, this amount is added to accumulated losses
+            const potentialPayout = currentTradeAmount * (payoutPercent / 100);
+            const netProfit = potentialPayout - totalLossAccumulated;
+
+            const tr = document.createElement('tr');
+            tr.className = `border-b border-slate-800/40 hover:bg-slate-800/20 transition duration-150 ${step % 2 === 0
+            ? 'bg-slate-900/20' : ''}`;
+
+            // Highlight rows for warning levels
+            let stepColor = 'text-slate-300';
+            if (step === 1) stepColor = 'text-accentCyan font-bold';
+            if (step === 3) stepColor = 'text-amber-500 font-bold';
+            if (step === 4) stepColor = 'text-rose-500 font-bold';
+
+            tr.innerHTML = `
+            <td class="p-2.5 text-center ${stepColor}">الخطوة ${step}</td>
+            <td class="p-2.5 text-slate-400 digital-font">${step === 1 ? 'الأساسي' : multiplier.toFixed(1) + 'x'}</td>
+            <td class="p-2.5 text-left text-white font-bold digital-font">$${currentTradeAmount.toFixed(2)}</td>
+            <td class="p-2.5 text-left ${netProfit > 0 ? 'text-emerald-400' : 'text-rose-400'} font-bold digital-font">
+                $${netProfit.toFixed(2)}</td>
+            `;
+
+            tbody.appendChild(tr);
+            totalLossAccumulated += currentTradeAmount;
+            }
+            }
+
+            // Initialize TradingView widget
+            let tvWidget = null;
+            function updateTradingViewWidget(symbol) {
+            const chartSymbolBadge = document.getElementById('chartSymbolBadge');
+
+            // Format incoming symbols to matching TV tickers
+            let formattedSymbol = symbol.replace('/', '').toUpperCase();
+
+            // Map common binary option pairs to standard FX / Cryptocurrencies on TradingView
+            let brokerSymbol = `FX:${formattedSymbol}`;
+            if (formattedSymbol.includes('BTC') || formattedSymbol.includes('ETH')) {
+            brokerSymbol = `BINANCE:${formattedSymbol}USDT`;
+            } else if (formattedSymbol.includes('USD') || formattedSymbol.includes('EUR') ||
+            formattedSymbol.includes('GBP') || formattedSymbol.includes('JPY') || formattedSymbol.includes('AUD') ||
+            formattedSymbol.includes('CAD')) {
+            brokerSymbol = `FX_IDC:${formattedSymbol}`;
+            }
+
+            chartSymbolBadge.innerText = formattedSymbol;
+
+            try {
+            tvWidget = new TradingView.widget({
+            "width": "100%",
+            "height": "100%",
+            "symbol": brokerSymbol,
+            "interval": "1",
+            "timezone": "Etc/UTC",
+            "theme": "dark",
+            "style": "1", // Candlesticks
+            "locale": "ar",
+            "toolbar_bg": "#0f172a",
+            "enable_publishing": false,
+            "hide_side_toolbar": false,
+            "allow_symbol_change": true,
+            "container_id": "tradingview_chart",
+            "save_image": false,
+            "studies": [
+            "RSI@tv-basicstudies",
+            "MASimple@tv-basicstudies"
+            ]
+            });
+            } catch (err) {
+            console.error("TradingView widget initialization failed", err);
+            }
+            }
+
+            // Helper: format duration in Arabic
+            function formatDurationArabic(durationStr) {
+            const val = parseInt(durationStr) || 1;
+            if (val === 1) return 'دقيقة واحدة';
+            if (val === 2) return 'دقيقتين';
+            if (val === 5) return '5 دقائق';
+            return `${val} دقائق`;
+            }
+
+            // Helper: get Arabic professional instructions
+            function getInstructionArabic(isBuy, pair, entryTimeStr, durationStr) {
+            const actionWord = isBuy ? 'شراء (CALL)' : 'بيع (PUT)';
+            const formattedTime = formatTime(entryTimeStr);
+            const durationArabic = formatDurationArabic(durationStr);
+            return `استعد لدخول صفقة <strong
+                class="${isBuy ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}">${actionWord}</strong> على
+            زوج <strong>${pair}</strong> عند شمعة الدقيقة القادمة (عند الساعة <span
+                class="digital-font font-bold">${formattedTime}</span>) لمدة <strong>${durationArabic}</strong>.`;
+            }
+
+            // Helper: get precision of currencies/cryptocurrencies
+            function getPrecision(pair) {
+            return pair.includes('BTC') || pair.includes('ETH') ? 2 : 5;
+            }
+
+            // Helper: Generate realistic price based on symbol
+            function getRealisticPrice(pair) {
+            let basePrice = 1.08500;
+            if (pair.includes('JPY')) basePrice = 155.60;
+            else if (pair.includes('BTC')) basePrice = 67320.00;
+            else if (pair.includes('ETH')) basePrice = 3450.00;
+            else if (pair.includes('GBP')) basePrice = 1.2720;
+            else if (pair.includes('AUD')) basePrice = 0.6650;
+            else if (pair.includes('CAD')) basePrice = 1.3680;
+
+            const variation = (Math.random() - 0.5) * (basePrice * 0.002);
+            return (basePrice + variation).toFixed(getPrecision(pair));
+            }
+
+            // Prepend new signal card dynamically with entry animation
+            function handleNewSignal(signalData) {
+            // Check if signal already exists
+            if (existingSignals.some(sig => sig.id === signalData.id)) return;
+
+            // Update counts
+            totalSignals++;
+            document.getElementById('totalSignalsCounter').innerText = totalSignals;
+
+            // Play notification sound
+            playAlertSound();
+
+            // Store in state (limit history list to 50 items)
+            existingSignals.unshift(signalData);
+            if (existingSignals.length > 50) {
+            existingSignals.pop();
+            }
+
+            // Render the whole list of active signals
+            renderSignals();
+
+            // Highlight & select this asset on TradingView
+            updateTradingViewWidget(signalData.pair);
+            }
+
+            // Render Signals based on active filters
+            function renderSignals() {
+            const container = document.getElementById('signalsContainer');
+            const noSignalsPlaceholder = document.getElementById('noSignalsPlaceholder');
+
+            // Filter existing signals (ignore expired ones in main signals list to keep it clean)
+            const filtered = existingSignals.filter(sig => {
+            if (activeFilter === 'all') return true;
+            return sig.action.toUpperCase() === activeFilter.toUpperCase();
+            });
+
+            if (filtered.length > 0) {
+            if (noSignalsPlaceholder) noSignalsPlaceholder.classList.add('hidden');
+            } else {
+            if (noSignalsPlaceholder) noSignalsPlaceholder.classList.remove('hidden');
+            }
+
+            container.innerHTML = '';
+            // If empty, append placeholder
+            if (filtered.length === 0) {
+            if (noSignalsPlaceholder) container.appendChild(noSignalsPlaceholder);
+            return;
+            }
+
+            filtered.forEach((sig, index) => {
+            const isBuy = sig.action.toUpperCase() === 'BUY' || sig.action.toUpperCase() === 'CALL';
+            const cardBorder = isBuy ? 'border-emerald-500/30 hover:border-emerald-400 bg-emerald-950/10' :
+            'border-rose-500/30 hover:border-rose-400 bg-rose-950/10';
+            const accentText = isBuy ? 'text-emerald-400' : 'text-rose-400';
+            const gradientIndicator = isBuy ? 'from-emerald-500/20 to-transparent' : 'from-rose-500/20 to-transparent';
+            const arrowIcon = isBuy ? 'fa-circle-arrow-up text-emerald-400' : 'fa-circle-arrow-down text-rose-400';
+            const actionLabel = isBuy ? 'شراء (CALL)' : 'بيع (PUT)';
+
+            const cardId = sig.id || `sig_${index}`;
+            const entryTime = new Date(new Date(sig.time).getTime() + 60000); // 1m delay
+            const instruction = getInstructionArabic(isBuy, sig.pair, entryTime.toISOString(), sig.duration);
+
+            const card = document.createElement('div');
+            card.id = `card-wrapper-${cardId}`;
+            card.className = `animate-signal-enter flex flex-col justify-between border rounded-2xl p-5 cursor-pointer
+            relative overflow-hidden transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg backdrop-blur-md
+            ${cardBorder}`;
+            card.setAttribute('onclick', `updateTradingViewWidget('${sig.pair}')`);
+
+            card.innerHTML = `
+            <!-- Left background accent glowing gradient -->
+            <div
+                class="absolute right-0 top-0 h-full w-32 bg-gradient-to-l ${gradientIndicator} opacity-30 pointer-events-none">
+            </div>
+
+            <div class="flex flex-col gap-3 z-10">
+                <div class="flex items-center justify-between gap-4">
+                    <!-- Right block: Asset Name and Action Icon -->
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-lg shadow">
+                            <i class="fa-solid ${arrowIcon} text-xl animate-pulse"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-base font-extrabold text-white digital-font tracking-wide">${sig.pair}</h3>
+                            <p class="text-[10px] font-bold text-slate-400 flex items-center gap-1 mt-0.5">
+                                <span>سعر الدخول:</span>
+                                <span class="text-white digital-font">${sig.entryPrice}</span>
+                            </p>
+                            <p class="text-[10px] font-bold text-slate-400 flex items-center gap-1"
+                                id="live-price-container-${cardId}">
+                                <span>السعر الحالي:</span>
+                                <span class="text-slate-350 digital-font font-bold"
+                                    id="live-price-val-${cardId}">--</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Center block: Action text -->
+                    <div class="text-center">
+                        <span
+                            class="inline-block text-xs font-black px-2.5 py-1 rounded-lg ${isBuy ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 shadow-buyGlow' : 'bg-rose-500/10 text-rose-400 border border-rose-500/30 shadow-sellGlow'}">
+                            ${actionLabel}
+                        </span>
+                    </div>
+
+                    <!-- Left block: Time Received -->
+                    <div class="text-left">
+                        <span class="text-xs font-bold text-slate-300 digital-font">${formatTime(sig.time)}</span>
+                        <p class="text-[9px] text-slate-500 mt-1 font-semibold">وقت الإرسال</p>
+                    </div>
+                </div>
+
+                <!-- Professional Arabic Instruction Block -->
+                <div
+                    class="bg-slate-900/60 rounded-xl p-3 border border-slate-800/80 text-xs leading-relaxed text-slate-300">
+                    <i class="fa-solid fa-circle-info text-accentCyan ml-1"></i>
+                    ${instruction}
+                </div>
+
+                <div class="flex items-center justify-between mt-1">
+                    <!-- Live status/countdown indicator -->
+                    <div id="countdown-text-${cardId}" class="text-xs font-bold"></div>
+
+                    <div class="text-[10px] text-slate-400 font-bold flex items-center gap-1">
+                        <i class="fa-regular fa-clock text-accentCyan"></i>
+                        <span>المدة: ${formatDurationArabic(sig.duration)}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress bar representing signal state -->
+            <div class="w-full bg-slate-900/60 h-1.5 rounded-full overflow-hidden mt-3 border border-slate-800/40">
+                <div class="h-full bg-gradient-to-l from-amber-500 to-yellow-400 rounded-full transition-all duration-1000"
+                    id="progress-bar-${cardId}" data-action="${isBuy ? 'buy' : 'sell'}" style="width: 100%"></div>
+            </div>
+            `;
+
+            container.appendChild(card);
+
+            // Run progress countdown (delay: 60s, duration in minutes)
+            startSignalCountdown(cardId, sig.time, parseInt(sig.duration), sig);
+            });
+            }
+
+            // Countdown visual helper with dual states
+            function startSignalCountdown(cardId, signalTimeStr, durationMinutes, sig) {
+            const bar = document.getElementById(`progress-bar-${cardId}`);
+            const countdownText = document.getElementById(`countdown-text-${cardId}`);
+            if (!bar || !countdownText) return;
+
+            const signalTime = new Date(signalTimeStr).getTime();
+            const entryTime = signalTime + 60000; // 60s delay
+            const durationSeconds = durationMinutes * 60;
+            const expiryTime = entryTime + (durationSeconds * 1000);
+
+            const precision = getPrecision(sig.pair);
+            let entryPrice = parseFloat(sig.entryPrice);
+            let currentPrice = entryPrice;
+            const isBuy = sig.action.toUpperCase() === 'BUY' || sig.action.toUpperCase() === 'CALL';
+
+            const livePriceVal = document.getElementById(`live-price-val-${cardId}`);
+
+            if (activeIntervals[cardId]) {
+            clearInterval(activeIntervals[cardId]);
+            }
+
+            activeIntervals[cardId] = setInterval(() => {
+            const now = Date.now();
+
+            if (now < entryTime) { // State 1: Delay/Prepare countdown const remainingSeconds=Math.max(0,
+                Math.round((entryTime - now) / 1000)); const pct=(remainingSeconds / 60) * 100;
+                bar.style.width=`${pct}%`;
+                bar.className="h-full bg-gradient-to-l from-amber-500 to-yellow-400 rounded-full transition-all duration-1000"
+                ; countdownText.innerHTML=`<span class="text-amber-400 font-bold animate-pulse"><i
+                    class="fa-solid fa-hourglass-start ml-1"></i>الدخول بعد: ${remainingSeconds} ثانية</span>`;
+
+                // Warning sound alerts for standard Pocket Option execution
+                if (remainingSeconds <= 3 && remainingSeconds> 0) {
+                    playCountdownBeep();
+                    }
+                    } else if (now >= entryTime && now < expiryTime) { // State 2: Trade duration countdown const
+                        remainingSeconds=Math.max(0, Math.round((expiryTime - now) / 1000)); const pct=(remainingSeconds
+                        / durationSeconds) * 100; bar.style.width=`${pct}%`; bar.className=`h-full bg-gradient-to-l
+                        ${isBuy ? 'from-emerald-500 to-teal-400' : 'from-rose-500 to-red-400' } rounded-full
+                        transition-all duration-1000`; // Flash success sound exactly at trade start if
+                        (remainingSeconds===durationSeconds) { playEntryChime(); } // Simulate price fluctuation and
+                        show live state (winning / losing) const fluctuation=(Math.random() - 0.5) * (entryPrice *
+                        0.0003); currentPrice=parseFloat((currentPrice + fluctuation).toFixed(precision)); if
+                        (livePriceVal) { livePriceVal.innerText=currentPrice.toFixed(precision); const isWinning=isBuy ?
+                        (currentPrice> entryPrice) : (currentPrice < entryPrice); if (isWinning) {
+                            livePriceVal.className="text-emerald-400 digital-font font-bold animate-pulse" ; } else {
+                            livePriceVal.className="text-rose-400 digital-font font-bold animate-pulse" ; } }
+                            countdownText.innerHTML=`<span class="text-emerald-400 font-bold"><i
+                                class="fa-solid fa-circle-play ml-1"></i>الصفقة جارية... متبقي: ${remainingSeconds}
+                            ثانية</span>`;
+                            } else {
+                            // State 3: Expired
+                            clearInterval(activeIntervals[cardId]);
+                            delete activeIntervals[cardId];
+
+                            bar.style.width = '0%';
+                            bar.parentElement.classList.add('opacity-30');
+                            countdownText.innerHTML = `<span class="text-slate-500 font-bold">انتهت صلاحية
+                                الإشارة</span>`;
+
+                            // Determine simulated outcome with realistic winrate (~78%)
+                            const isWin = Math.random() < 0.78; const offset=entryPrice * 0.0002; let exitPrice=0; if
+                                (isWin) { exitPrice=isBuy ? (entryPrice + offset) : (entryPrice - offset); } else {
+                                exitPrice=isBuy ? (entryPrice - offset) : (entryPrice + offset); }
+                                exitPrice=parseFloat(exitPrice.toFixed(precision)); if (livePriceVal) {
+                                livePriceVal.innerText=exitPrice.toFixed(precision); livePriceVal.className=isWin
+                                ? "text-emerald-500 digital-font font-bold" : "text-rose-500 digital-font font-bold" ; }
+                                // Remove card from active UI list slightly after completion, then record it
+                                setTimeout(()=> {
+                                const wrapper = document.getElementById(`card-wrapper-${cardId}`);
+                                if (wrapper) wrapper.remove();
+                                }, 5000);
+
+                                recordSignalOutcome(sig, isWin, entryPrice.toFixed(precision),
+                                exitPrice.toFixed(precision));
+                                }
+                                }, 1000);
+                                }
+
+                                // Helper: Format date/time
+                                function formatTime(timeStr) {
+                                try {
+                                const date = new Date(timeStr);
+                                let hours = date.getHours().toString().padStart(2, '0');
+                                let minutes = date.getMinutes().toString().padStart(2, '0');
+                                let seconds = date.getSeconds().toString().padStart(2, '0');
+                                return `${hours}:${minutes}:${seconds}`;
+                                } catch (e) {
+                                return timeStr;
+                                }
+                                }
+
+                                // Filtering Logic
+                                function filterSignals(action) {
+                                activeFilter = action;
+
+                                // Toggle active classes
+                                const btns = ['all', 'BUY', 'SELL'];
+                                btns.forEach(btn => {
+                                const el = document.getElementById(`filterBtn-${btn}`);
+                                if (btn === action) {
+                                el.className = "px-3 py-1 rounded bg-accentCyan/10 border border-accentCyan/50
+                                text-accentCyan font-bold transition";
+                                } else {
+                                el.className = "px-3 py-1 rounded bg-slate-900 text-slate-400 border border-slate-800
+                                hover:border-slate-700 transition";
+                                }
+                                });
+
+                                renderSignals();
+                                }
+
+                                // Socket.io Connection
+                                function connectSocket() {
+                                const connectionStatus = document.getElementById('connectionStatus');
+                                const connectionDot = document.getElementById('connectionDot');
+                                const connectionText = document.getElementById('connectionText');
+
+                                // Helper to activate standalone mode
+                                function activateStandaloneMode() {
+                                    console.log("Activating Standalone Mode - Auto Signal Generation");
+                                    connectionStatus.className = "flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-xs font-semibold shadow-cyberGlow transition-all duration-300";
+                                    connectionDot.className = "w-2.5 h-2.5 bg-accentCyan rounded-full pulse-indicator-green shrink-0";
+                                    connectionText.innerText = "الوضع المستقل - نشط";
+
+                                    // Auto generate signals every 12 seconds
+                                    if (!autoSimulateInterval) {
+                                        autoSimulateInterval = setInterval(simulateSignal, 12000);
+                                    }
+                                }
+
+                                try {
+                                    if (typeof io === 'undefined') {
+                                        console.log("Socket.io not loaded, switching to standalone mode");
+                                        activateStandaloneMode();
+                                        return;
+                                    }
+
+                                socket = io('http://localhost:5000', {
+                                reconnectionAttempts: 5,
+                                timeout: 8000,
+                                transports: ['websocket', 'polling']
+                                });
+
+                                socket.on('connect', () => {
+                                console.log("Connected to Server!");
+                                connectionStatus.className = "flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold shadow-buyGlow transition-all duration-300";
+                                connectionDot.className = "w-2.5 h-2.5 bg-emerald-500 rounded-full pulse-indicator-green shrink-0";
+                                connectionText.innerText = "متصل بالخادم";
+                                // Stop auto simulation if server is connected
+                                if (autoSimulateInterval) {
+                                    clearInterval(autoSimulateInterval);
+                                    autoSimulateInterval = null;
+                                }
+                                });
+
+                                socket.on('disconnect', () => {
+                                console.log("Disconnected from Server, switching to standalone.");
+                                activateStandaloneMode();
+                                });
+
+                                socket.on('connect_error', () => {
+                                console.log("Server unreachable, switching to standalone mode.");
+                                activateStandaloneMode();
+                                if (socket) { socket.disconnect(); socket = null; }
+                                });
+
+                                socket.on('new-signal', (data) => {
+                                console.log("New Signal received:", data);
+                                handleNewSignal(data);
+                                });
+
+                                } catch (err) {
+                                console.error("Socket.io initial connection failed", err);
+                                activateStandaloneMode();
+                                }
+                                }
+
+                                // Mock Signal Simulator (Creates realistic trading signals dynamically)
+                                const mockPairs = ['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'EUR/JPY',
+                                'BTC/USD', 'ETH/USD'];
+                                const mockDurations = ['1m', '2m', '5m'];
+
+                                function simulateSignal() {
+                                const randomPair = mockPairs[Math.floor(Math.random() * mockPairs.length)];
+                                const randomAction = Math.random() > 0.5 ? 'BUY' : 'SELL';
+                                const randomDuration = mockDurations[Math.floor(Math.random() * mockDurations.length)];
+
+                                const entryPrice = getRealisticPrice(randomPair);
+
+                                const mockSignal = {
+                                id: 'mock_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                                pair: randomPair,
+                                action: randomAction,
+                                duration: randomDuration,
+                                entryPrice: entryPrice,
+                                time: new Date().toISOString()
+                                };
+
+                                handleNewSignal(mockSignal);
+                                }
+
+                                // Auto Simulation Switch
+                                function toggleAutoSimulation() {
+                                const checkbox = document.getElementById('autoSimulateCheckbox');
+                                if (checkbox.checked) {
+                                simulateSignal();
+                                autoSimulateInterval = setInterval(simulateSignal, 15000);
+                                } else {
+                                clearInterval(autoSimulateInterval);
+                                autoSimulateInterval = null;
+                                }
+                                }
+
+                                // Custom Recommendation System
+                                const technicalAnalyses = {
+                                BUY: [
+                                "مؤشر القوة النسبية (RSI) يشير إلى تشبع بيعي عند مستوى 28، مع تقاطع إيجابي لمتوسط الحركة
+                                (MA). يُنصح بدخول صفقة شراء مع بداية الشمعة القادمة.",
+                                "تقاطع متوسطات الحركة الأسيّة (EMA 9/21) بشكل تصاعدي على إطار الدقيقة، مع ارتداد السعر
+                                من مستوى الدعم اليومي الأساسي.",
+                                "انعكاس إيجابي من الحد السفلي لمؤشر بولينجر باند (Bollinger Bands) مع زيادة واضحة في حجم
+                                تداولات الشراء (Buy Volume).",
+                                "تشكل نموذج شمعة 'المطرقة' (Hammer) الانعكاسية عند مستوى دعم قوي، مما يدعم الصعود الفوري
+                                المتوقع."
+                                ],
+                                SELL: [
+                                "مؤشر RSI يظهر تشبعاً شرائياً عند مستوى 73 مع بدء انحناء خطوط Stochastic لأسفل، مما يشير
+                                إلى هبوط وشيك للأسعار.",
+                                "تقاطع هبوطي لمتوسطات الحركة (EMA 9/21) مع كسر السعر لخط اتجاه صاعد فرعي، مما يؤكد سيطرة
+                                البائعين.",
+                                "ملامسة السعر للحد العلوي لمؤشر بولينجر باند وظهور شمعة ابتلاعية هبوطية (Bearish
+                                Engulfing) تدعم انخفاض السعر.",
+                                "فشل السعر في اختراق مستوى المقاومة الأساسي وتراجع الزخم الشرائي بشكل حاد وفقاً لمؤشر
+                                MACD."
+                                ]
+                                };
+
+                                function requestCustomAnalysis() {
+                                const asset = document.getElementById('customAssetSelect').value;
+                                const duration = document.getElementById('customDurationSelect').value;
+                                const delay = parseInt(document.getElementById('customDelaySelect').value);
+
+                                const loader = document.getElementById('analysisLoader');
+                                const resultDiv = document.getElementById('customSignalResult');
+                                const progressBar = document.getElementById('analysisProgressBar');
+                                const percentText = document.getElementById('analysisPercentText');
+
+                                resultDiv.classList.add('hidden');
+                                loader.classList.remove('hidden');
+                                progressBar.style.width = '0%';
+                                percentText.innerText = '0%';
+
+                                playAlertSound();
+
+                                let progress = 0;
+                                const interval = setInterval(() => {
+                                progress += Math.floor(Math.random() * 15) + 5;
+                                if (progress >= 100) {
+                                progress = 100;
+                                clearInterval(interval);
+
+                                setTimeout(() => {
+                                loader.classList.add('hidden');
+                                generateCustomSignal(asset, duration, delay);
+                                }, 300);
+                                }
+                                progressBar.style.width = `${progress}%`;
+                                percentText.innerText = `${progress}%`;
+                                }, 80);
+                                }
+
+                                let customSignalIdCounter = 0;
+
+                                function generateCustomSignal(pair, durationMinutes, delayMinutes) {
+                                const resultDiv = document.getElementById('customSignalResult');
+                                resultDiv.classList.remove('hidden');
+
+                                const isBuy = Math.random() > 0.5;
+                                const action = isBuy ? 'BUY' : 'SELL';
+                                const actionLabel = isBuy ? 'شراء (UP/Green)' : 'بيع (DOWN/Red)';
+                                const accentColor = isBuy ? 'text-emerald-400 border-emerald-500/30 bg-emerald-950/10' :
+                                'text-rose-400 border-rose-500/30 bg-rose-950/10';
+                                const glowClass = isBuy ? 'shadow-buyGlow' : 'shadow-sellGlow';
+
+                                const entryPrice = getRealisticPrice(pair);
+
+                                const now = new Date();
+                                const signalTime = now.toISOString();
+                                const delaySeconds = delayMinutes * 60;
+                                const entryTime = new Date(now.getTime() + delaySeconds * 1000);
+
+                                const analyses = technicalAnalyses[isBuy ? 'BUY' : 'SELL'];
+                                const randomReason = analyses[Math.floor(Math.random() * analyses.length)];
+
+                                customSignalIdCounter++;
+                                const customCardId = `custom_sig_${customSignalIdCounter}`;
+
+                                // Calculate money risk planning based on user parameters
+                                const balanceVal = parseFloat(document.getElementById('balanceInput').value) || 100;
+                                const riskPercent = parseFloat(document.getElementById('riskInput').value) || 2.5;
+                                const multiplierVal = parseFloat(document.getElementById('multiplierInput').value) ||
+                                2.2;
+
+                                const safeAmount = (balanceVal * (riskPercent / 100)).toFixed(2);
+                                const martingale1 = (safeAmount * multiplierVal).toFixed(2);
+                                const martingale2 = (martingale1 * multiplierVal).toFixed(2);
+
+                                // Technical indicators values
+                                const rsiValue = isBuy ? Math.floor(Math.random() * 13) + 22 : Math.floor(Math.random()
+                                * 13) + 65;
+                                const trendStrength = Math.floor(Math.random() * 20) + 75;
+
+                                let timeInstruction = '';
+                                if (delayMinutes === 0) {
+                                timeInstruction = `اضغط على زر <strong
+                                    class="${isBuy ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}">${actionLabel}</strong>
+                                على منصة Pocket Option <strong class="text-emerald-400 animate-pulse">فالآن
+                                    فوراً</strong>.`;
+                                } else {
+                                const formattedEntryTime = formatTime(entryTime.toISOString());
+                                timeInstruction = `قم بدخول الصفقة <strong
+                                    class="${isBuy ? 'text-emerald-400 font-bold' : 'text-rose-450 font-bold'}">${actionLabel}</strong>
+                                عند شمعة الدقيقة القادمة (الساعة <span
+                                    class="digital-font font-bold text-white">${formattedEntryTime}</span>).`;
+                                }
+
+                                resultDiv.innerHTML = `
+                                <div class="border rounded-2xl p-5 relative overflow-hidden transition-all duration-300 backdrop-blur-md ${accentColor} border-accentCyan/40 shadow-cyberGlow"
+                                    id="custom-card-wrapper-${customCardId}">
+                                    <div
+                                        class="absolute right-0 top-0 h-full w-24 bg-gradient-to-l from-accentCyan/10 to-transparent opacity-30 pointer-events-none">
+                                    </div>
+                                    <div class="flex flex-col gap-4">
+                                        <!-- Header with Status -->
+                                        <div
+                                            class="flex items-center justify-between gap-4 border-b border-slate-800 pb-2">
+                                            <div class="flex items-center gap-2">
+                                                <span
+                                                    class="px-2 py-0.5 text-[9px] font-extrabold bg-accentCyan/20 border border-accentCyan/40 text-accentCyan rounded">خطة
+                                                    Pocket Option</span>
+                                                <h3
+                                                    class="text-sm font-extrabold text-white digital-font tracking-wide">
+                                                    ${pair}</h3>
+                                            </div>
+
+                                            <span
+                                                class="inline-block text-xs font-black px-2.5 py-1 rounded-lg ${isBuy ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/10 text-rose-400 border border-rose-500/30'} ${glowClass}">
+                                                ${actionLabel}
+                                            </span>
+                                        </div>
+
+                                        <!-- Technical Plan Steps -->
+                                        <div
+                                            class="bg-slate-900/80 rounded-xl p-3 border border-slate-850 text-xs leading-relaxed text-slate-300 flex flex-col gap-2">
+                                            <span
+                                                class="font-bold text-accentCyan border-b border-slate-800 pb-1.5 mb-1 block"><i
+                                                    class="fa-solid fa-list-check ml-1"></i>خطوات التنفيذ على Pocket
+                                                Option:</span>
+                                            <div class="flex items-start gap-1.5">
+                                                <span
+                                                    class="w-4 h-4 rounded-full bg-slate-800 border border-slate-700 text-[10px] font-black text-center flex items-center justify-center text-slate-300 shrink-0">1</span>
+                                                <p>افتح منصة <strong>Pocket Option</strong> واختر زوج العملات <strong
+                                                        class="text-white">${pair}</strong>.</p>
+                                            </div>
+                                            <div class="flex items-start gap-1.5">
+                                                <span
+                                                    class="w-4 h-4 rounded-full bg-slate-800 border border-slate-700 text-[10px] font-black text-center flex items-center justify-center text-slate-300 shrink-0">2</span>
+                                                <p>اضبط وقت انتهاء الصفقة على <strong
+                                                        class="text-white">${formatDurationArabic(durationMinutes +
+                                                        'm')}</strong>.</p>
+                                            </div>
+                                            <div class="flex items-start gap-1.5">
+                                                <span
+                                                    class="w-4 h-4 rounded-full bg-slate-800 border border-slate-700 text-[10px] font-black text-center flex items-center justify-center text-slate-300 shrink-0">3</span>
+                                                <p>المبلغ المقترح: <strong
+                                                        class="text-emerald-400 digital-font font-bold">$${safeAmount}</strong>
+                                                    (مضاعفات مارتينجال: 1: <span
+                                                        class="digital-font">$${martingale1}</span>, 2: <span
+                                                        class="digital-font">$${martingale2}</span>).</p>
+                                            </div>
+                                            <div class="flex items-start gap-1.5">
+                                                <span
+                                                    class="w-4 h-4 rounded-full bg-slate-800 border border-slate-700 text-[10px] font-black text-center flex items-center justify-center text-slate-300 shrink-0">4</span>
+                                                <p>${timeInstruction}</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Technical Analysis & Indicators Summary -->
+                                        <div
+                                            class="text-[11px] text-slate-400 bg-slate-950/40 border border-slate-900/60 p-2.5 rounded-xl leading-relaxed">
+                                            <span
+                                                class="font-bold text-slate-300 block mb-1.5 border-b border-slate-900/40 pb-1"><i
+                                                    class="fa-solid fa-chart-simple text-accentCyan ml-1"></i>التحليل
+                                                الفني للمؤشرات:</span>
+                                            <div class="grid grid-cols-3 gap-2 text-center text-[10px] mb-2 font-bold">
+                                                <div
+                                                    class="bg-slate-900/70 border border-slate-800/80 rounded px-1 py-1">
+                                                    <span class="text-slate-500 block text-[9px]">RSI (14)</span>
+                                                    <span
+                                                        class="${isBuy ? 'text-emerald-400' : 'text-rose-400'} digital-font">${rsiValue}</span>
+                                                </div>
+                                                <div
+                                                    class="bg-slate-900/70 border border-slate-800/80 rounded px-1 py-1">
+                                                    <span class="text-slate-500 block text-[9px]">Bollinger Bands</span>
+                                                    <span
+                                                        class="${isBuy ? 'text-emerald-400' : 'text-rose-400'}">${isBuy
+                                                        ? 'حد سفلي (دعم)' : 'حد علوي (مقاومة)'}</span>
+                                                </div>
+                                                <div
+                                                    class="bg-slate-900/70 border border-slate-800/80 rounded px-1 py-1">
+                                                    <span class="text-slate-500 block text-[9px]">قوة الاتجاه</span>
+                                                    <span class="text-accentCyan">${trendStrength}% ${isBuy ? 'صعود' :
+                                                        'هبوط'}</span>
+                                                </div>
+                                            </div>
+                                            <span class="text-slate-300 leading-normal block">${randomReason}</span>
+                                        </div>
+
+                                        <!-- Footer values -->
+                                        <div
+                                            class="flex items-center justify-between border-t border-slate-800/80 pt-3">
+                                            <div class="flex flex-col">
+                                                <span class="text-[9px] text-slate-500 font-semibold">سعر الدخول
+                                                    المستهدف:</span>
+                                                <span
+                                                    class="text-xs font-bold text-white digital-font">${entryPrice}</span>
+                                                <span class="text-[9px] text-slate-500 font-semibold mt-1">السعر
+                                                    الحالي:</span>
+                                                <span class="text-slate-300 digital-font font-bold"
+                                                    id="custom-live-price-val-${customCardId}">--</span>
+                                            </div>
+
+                                            <div class="flex flex-col items-end justify-end h-full">
+                                                <span id="custom-countdown-text-${customCardId}"
+                                                    class="text-xs font-bold"></span>
+                                            </div>
+                                        </div>
+
+                                        <!-- Progress Bar -->
+                                        <div
+                                            class="w-full bg-slate-900/60 h-1.5 rounded-full overflow-hidden mt-1 border border-slate-800/40">
+                                            <div class="h-full bg-gradient-to-l from-amber-500 to-yellow-400 rounded-full transition-all duration-1000"
+                                                id="custom-progress-bar-${customCardId}"
+                                                data-action="${isBuy ? 'buy' : 'sell'}" style="width: 100%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                `;
+
+                                const mockSignal = {
+                                id: customCardId,
+                                pair: pair,
+                                action: isBuy ? 'BUY' : 'SELL',
+                                duration: durationMinutes + 'm',
+                                entryPrice: entryPrice,
+                                time: signalTime
+                                };
+
+                                // Start countdown for custom signal
+                                startCustomSignalCountdown(customCardId, signalTime, delayMinutes, durationMinutes,
+                                mockSignal);
+                                }
+
+                                function startCustomSignalCountdown(cardId, signalTimeStr, delayMinutes,
+                                durationMinutes, sig) {
+                                const bar = document.getElementById(`custom-progress-bar-${cardId}`);
+                                const countdownText = document.getElementById(`custom-countdown-text-${cardId}`);
+                                if (!bar || !countdownText) return;
+
+                                const signalTime = new Date(signalTimeStr).getTime();
+                                const delaySeconds = delayMinutes * 60;
+                                const entryTime = signalTime + (delaySeconds * 1000);
+                                const durationSeconds = durationMinutes * 60;
+                                const expiryTime = entryTime + (durationSeconds * 1000);
+
+                                const precision = getPrecision(sig.pair);
+                                let entryPrice = parseFloat(sig.entryPrice);
+                                let currentPrice = entryPrice;
+                                const isBuy = sig.action.toUpperCase() === 'BUY' || sig.action.toUpperCase() === 'CALL';
+
+                                const livePriceVal = document.getElementById(`custom-live-price-val-${cardId}`);
+
+                                if (activeIntervals[cardId]) {
+                                clearInterval(activeIntervals[cardId]);
+                                }
+
+                                activeIntervals[cardId] = setInterval(() => {
+                                const now = Date.now();
+
+                                if (now < entryTime) { const totalDelay=delaySeconds || 1; const
+                                    remainingSeconds=Math.max(0, Math.round((entryTime - now) / 1000)); const
+                                    pct=(remainingSeconds / totalDelay) * 100; bar.style.width=`${pct}%`;
+                                    bar.className="h-full bg-gradient-to-l from-amber-500 to-yellow-400 rounded-full transition-all duration-1000"
+                                    ; countdownText.innerHTML=`<span class="text-amber-400 font-bold animate-pulse"><i
+                                        class="fa-solid fa-clock-rotate-left ml-1"></i>وقت التحضير:
+                                    ${remainingSeconds}ث</span>`;
+
+                                    if (remainingSeconds <= 3 && remainingSeconds> 0) {
+                                        playCountdownBeep();
+                                        }
+                                        } else if (now >= entryTime && now < expiryTime) { const
+                                            remainingSeconds=Math.max(0, Math.round((expiryTime - now) / 1000)); const
+                                            pct=(remainingSeconds / durationSeconds) * 100; bar.style.width=`${pct}%`;
+                                            bar.className=`h-full bg-gradient-to-l ${isBuy
+                                            ? 'from-emerald-500 to-teal-400' : 'from-rose-500 to-red-400' } rounded-full
+                                            transition-all duration-1000`; if (remainingSeconds===durationSeconds) {
+                                            playEntryChime(); } // Simulate price fluctuation and show live state
+                                            (winning / losing) const fluctuation=(Math.random() - 0.5) * (entryPrice *
+                                            0.0003); currentPrice=parseFloat((currentPrice +
+                                            fluctuation).toFixed(precision)); if (livePriceVal) {
+                                            livePriceVal.innerText=currentPrice.toFixed(precision); const
+                                            isWinning=isBuy ? (currentPrice> entryPrice) : (currentPrice < entryPrice);
+                                                if (isWinning) {
+                                                livePriceVal.className="text-emerald-400 digital-font font-bold animate-pulse"
+                                                ; } else {
+                                                livePriceVal.className="text-rose-400 digital-font font-bold animate-pulse"
+                                                ; } } countdownText.innerHTML=`<span class="text-emerald-400 font-bold">
+                                                <i class="fa-solid fa-circle-play ml-1"></i>الصفقة جارية:
+                                                ${remainingSeconds}ث</span>`;
+                                                } else {
+                                                clearInterval(activeIntervals[cardId]);
+                                                delete activeIntervals[cardId];
+
+                                                bar.style.width = '0%';
+                                                bar.parentElement.classList.add('opacity-30');
+                                                countdownText.innerHTML = `<span class="text-slate-500 font-bold">انتهت
+                                                    صلاحية الإشارة</span>`;
+
+                                                // Determine outcome
+                                                const isWin = Math.random() < 0.78; // 78% win rate const
+                                                    offset=entryPrice * 0.0002; let exitPrice=0; if (isWin) {
+                                                    exitPrice=isBuy ? (entryPrice + offset) : (entryPrice - offset); }
+                                                    else { exitPrice=isBuy ? (entryPrice - offset) : (entryPrice +
+                                                    offset); } exitPrice=parseFloat(exitPrice.toFixed(precision)); if
+                                                    (livePriceVal) {
+                                                    livePriceVal.innerText=exitPrice.toFixed(precision);
+                                                    livePriceVal.className=isWin
+                                                    ? "text-emerald-500 digital-font font-bold"
+                                                    : "text-rose-500 digital-font font-bold" ; } // Remove card from
+                                                    active UI list slightly after completion, then record it
+                                                    setTimeout(()=> {
+                                                    const wrapper =
+                                                    document.getElementById(`custom-card-wrapper-${cardId}`);
+                                                    if (wrapper) wrapper.remove();
+                                                    }, 5000);
+
+                                                    recordSignalOutcome(sig, isWin, entryPrice.toFixed(precision),
+                                                    exitPrice.toFixed(precision));
+                                                    }
+                                                    }, 1000);
+                                                    }
+
+                                                    // Record outcomes and update stats dynamically
+                                                    function recordSignalOutcome(sig, isWin, entryPriceVal,
+                                                    exitPriceVal) {
+                                                    // Update stats
+                                                    if (isWin) {
+                                                    totalWins++;
+                                                    } else {
+                                                    totalLosses++;
+                                                    }
+
+                                                    // Update win rate HTML
+                                                    const totalCount = totalWins + totalLosses;
+                                                    const winRate = totalCount > 0 ? ((totalWins / totalCount) *
+                                                    100).toFixed(1) : 0;
+                                                    document.getElementById('winRateOutput').innerText = `${winRate}%`;
+                                                    document.getElementById('winLossRatioOutput').innerHTML = `
+                                                    <i class="fa-solid fa-shield-halved text-signalBuy"></i>
+                                                    <span>الرابحة: ${totalWins} | الخاسرة: ${totalLosses}</span>
+                                                    `;
+
+                                                    // Add to expiredSignals (limit history to 100 items)
+                                                    const expiredSig = {
+                                                    id: sig.id || `expired_${Date.now()}`,
+                                                    pair: sig.pair,
+                                                    action: sig.action,
+                                                    duration: sig.duration,
+                                                    entryPrice: entryPriceVal,
+                                                    exitPrice: exitPriceVal,
+                                                    outcome: isWin ? 'WIN' : 'LOSS',
+                                                    time: sig.time,
+                                                    endTime: new Date().toISOString()
+                                                    };
+
+                                                    expiredSignals.unshift(expiredSig);
+                                                    if (expiredSignals.length > 100) {
+                                                    expiredSignals.pop();
+                                                    }
+
+                                                    // Render History Log
+                                                    renderHistoryLog();
+                                                    }
+
+                                                    // Render expired signals table log
+                                                    function renderHistoryLog() {
+                                                    const tbody = document.getElementById('historyTableBody');
+                                                    const emptyHistoryRow = document.getElementById('emptyHistoryRow');
+                                                    const historyTotalCount =
+                                                    document.getElementById('historyTotalCount');
+                                                    const historyWinCount = document.getElementById('historyWinCount');
+                                                    const historyLossCount =
+                                                    document.getElementById('historyLossCount');
+
+                                                    historyTotalCount.innerText = expiredSignals.length;
+                                                    historyWinCount.innerText = totalWins;
+                                                    historyLossCount.innerText = totalLosses;
+
+                                                    if (expiredSignals.length === 0) {
+                                                    if (emptyHistoryRow) emptyHistoryRow.classList.remove('hidden');
+                                                    return;
+                                                    }
+
+                                                    if (emptyHistoryRow) emptyHistoryRow.classList.add('hidden');
+
+                                                    // Clean table
+                                                    tbody.innerHTML = '';
+
+                                                    expiredSignals.forEach((sig) => {
+                                                    const tr = document.createElement('tr');
+                                                    const isWin = sig.outcome === 'WIN';
+                                                    const outcomeClass = isWin ? 'text-emerald-400 bg-emerald-500/10
+                                                    border-emerald-500/30 shadow-buyGlow' : 'text-rose-400
+                                                    bg-rose-500/10 border-rose-500/30 shadow-sellGlow';
+                                                    const actionClass = (sig.action.toUpperCase() === 'BUY' ||
+                                                    sig.action.toUpperCase() === 'CALL') ? 'text-emerald-400
+                                                    animate-pulse' : 'text-rose-400 animate-pulse';
+                                                    const actionLabel = (sig.action.toUpperCase() === 'BUY' ||
+                                                    sig.action.toUpperCase() === 'CALL') ? 'شراء (UP)' : 'بيع (DOWN)';
+
+                                                    tr.className = 'border-b border-slate-800/40 hover:bg-slate-800/10
+                                                    transition duration-150';
+                                                    tr.innerHTML = `
+                                                    <td class="p-3 text-center digital-font text-slate-500">
+                                                        ${sig.id.replace('mock_', '').replace('sig_', '').substring(0,
+                                                        8)}</td>
+                                                    <td class="p-3 text-center font-bold text-white digital-font">
+                                                        ${sig.pair}</td>
+                                                    <td class="p-3 text-center ${actionClass} font-bold">${actionLabel}
+                                                    </td>
+                                                    <td class="p-3 text-center text-slate-400">
+                                                        ${formatDurationArabic(sig.duration)}</td>
+                                                    <td class="p-3 text-center digital-font font-bold text-slate-300">
+                                                        $${sig.entryPrice}</td>
+                                                    <td class="p-3 text-center digital-font font-bold text-white">
+                                                        $${sig.exitPrice}</td>
+                                                    <td class="p-3 text-center">
+                                                        <span
+                                                            class="inline-block text-[10px] font-black px-2 py-0.5 rounded border ${outcomeClass}">
+                                                            ${sig.outcome === 'WIN' ? 'ربح WIN' : 'خسارة LOSS'}
+                                                        </span>
+                                                    </td>
+                                                    <td class="p-3 text-center text-slate-500 digital-font">
+                                                        ${formatTime(sig.endTime)}</td>
+                                                    `;
+                                                    tbody.appendChild(tr);
+                                                    });
+                                                    }
+
+                                                    // Initialize application on load
+                                                    window.addEventListener('DOMContentLoaded', () => {
+                                                    calculateRisk();
+                                                    updateTradingViewWidget('EUR/USD');
+                                                    connectSocket();
+                                                    filterSignals('all');
+                                                    renderHistoryLog();
+
+                                                    setTimeout(() => {
+                                                    simulateSignal();
+                                                    }, 1000);
+                                                    });
+                                                    </script>nd((entryTime - now) / 1000));
+                                                    const pct = (remainingSeconds / totalDelay) * 100;
+                                                    bar.style.width = `${pct}%`;
+                                                    bar.className = "h-full bg-gradient-to-l from-amber-500
+                                                    to-yellow-400 rounded-full transition-all duration-1000";
+                                                    countdownText.innerHTML = `<span
+                                                        class="text-amber-400 font-bold animate-pulse"><i
+                                                            class="fa-solid fa-clock-rotate-left ml-1"></i>وقت التحضير:
+                                                        ${remainingSeconds}ث</span>`;
+                                                    } else if (now >= entryTime && now < expiryTime) { const
+                                                        remainingSeconds=Math.max(0, Math.round((expiryTime - now) /
+                                                        1000)); const pct=(remainingSeconds / durationSeconds) * 100;
+                                                        bar.style.width=`${pct}%`; const
+                                                        isBuy=bar.dataset.action==='buy' ; bar.className=`h-full
+                                                        bg-gradient-to-l ${isBuy ? 'from-emerald-500 to-teal-400'
+                                                        : 'from-rose-500 to-red-400' } rounded-full transition-all
+                                                        duration-1000`; countdownText.innerHTML=`<span
+                                                        class="text-emerald-400 font-bold"><i
+                                                            class="fa-solid fa-circle-play ml-1"></i>الصفقة جارية:
+                                                        ${remainingSeconds}ث</span>`;
+
+                                                        if (remainingSeconds === durationSeconds) {
+                                                        playAlertSound();
+                                                        }
+                                                        } else {
+                                                        clearInterval(interval);
+                                                        bar.style.width = '0%';
+                                                        bar.parentElement.classList.add('opacity-30');
+                                                        countdownText.innerHTML = `<span
+                                                            class="text-slate-500 font-bold">انتهت صلاحية
+                                                            الإشارة</span>`;
+                                                        }
+                                                        }, 1000);
+                                                        }
+
+                                                        // Initialize application on load
+                                                        window.addEventListener('DOMContentLoaded', () => {
+                                                        calculateRisk();
+                                                        updateTradingViewWidget('EUR/USD');
+                                                        connectSocket();
+                                                        filterSignals('all');
+
+                                                        setTimeout(() => {
+                                                        simulateSignal();
+                                                        }, 1000);
+                                                        });
+                                                        </script>
+</body>
+
+</html>
