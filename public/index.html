@@ -1601,53 +1601,6 @@
                                                     simulateSignal();
                                                     }, 1000);
                                                     });
-                                                    </script>nd((entryTime - now) / 1000));
-                                                    const pct = (remainingSeconds / totalDelay) * 100;
-                                                    bar.style.width = `${pct}%`;
-                                                    bar.className = "h-full bg-gradient-to-l from-amber-500
-                                                    to-yellow-400 rounded-full transition-all duration-1000";
-                                                    countdownText.innerHTML = `<span
-                                                        class="text-amber-400 font-bold animate-pulse"><i
-                                                            class="fa-solid fa-clock-rotate-left ml-1"></i>وقت التحضير:
-                                                        ${remainingSeconds}ث</span>`;
-                                                    } else if (now >= entryTime && now < expiryTime) { const
-                                                        remainingSeconds=Math.max(0, Math.round((expiryTime - now) /
-                                                        1000)); const pct=(remainingSeconds / durationSeconds) * 100;
-                                                        bar.style.width=`${pct}%`; const
-                                                        isBuy=bar.dataset.action==='buy' ; bar.className=`h-full
-                                                        bg-gradient-to-l ${isBuy ? 'from-emerald-500 to-teal-400'
-                                                        : 'from-rose-500 to-red-400' } rounded-full transition-all
-                                                        duration-1000`; countdownText.innerHTML=`<span
-                                                        class="text-emerald-400 font-bold"><i
-                                                            class="fa-solid fa-circle-play ml-1"></i>الصفقة جارية:
-                                                        ${remainingSeconds}ث</span>`;
-
-                                                        if (remainingSeconds === durationSeconds) {
-                                                        playAlertSound();
-                                                        }
-                                                        } else {
-                                                        clearInterval(interval);
-                                                        bar.style.width = '0%';
-                                                        bar.parentElement.classList.add('opacity-30');
-                                                        countdownText.innerHTML = `<span
-                                                            class="text-slate-500 font-bold">انتهت صلاحية
-                                                            الإشارة</span>`;
-                                                        }
-                                                        }, 1000);
-                                                        }
-
-                                                        // Initialize application on load
-                                                        window.addEventListener('DOMContentLoaded', () => {
-                                                        calculateRisk();
-                                                        updateTradingViewWidget('EUR/USD');
-                                                        connectSocket();
-                                                        filterSignals('all');
-
-                                                        setTimeout(() => {
-                                                        simulateSignal();
-                                                        }, 1000);
-                                                        });
-                                                        </script>
+                                                    
 </body>
-
 </html>
