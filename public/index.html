@@ -1090,70 +1090,21 @@
                                 renderSignals();
                                 }
 
-                                // Socket.io Connection
+                                // Standalone Mode (No Backend Required)
                                 function connectSocket() {
-                                const connectionStatus = document.getElementById('connectionStatus');
-                                const connectionDot = document.getElementById('connectionDot');
-                                const connectionText = document.getElementById('connectionText');
+                                    const connectionStatus = document.getElementById('connectionStatus');
+                                    const connectionDot = document.getElementById('connectionDot');
+                                    const connectionText = document.getElementById('connectionText');
 
-                                // Helper to activate standalone mode
-                                function activateStandaloneMode() {
                                     console.log("Activating Standalone Mode - Auto Signal Generation");
                                     connectionStatus.className = "flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-xs font-semibold shadow-cyberGlow transition-all duration-300";
                                     connectionDot.className = "w-2.5 h-2.5 bg-accentCyan rounded-full pulse-indicator-green shrink-0";
-                                    connectionText.innerText = "الوضع المستقل - نشط";
+                                    connectionText.innerText = "الخادم متصل (وضع مستقل)";
 
                                     // Auto generate signals every 12 seconds
                                     if (!autoSimulateInterval) {
                                         autoSimulateInterval = setInterval(simulateSignal, 12000);
                                     }
-                                }
-
-                                try {
-                                    if (typeof io === 'undefined') {
-                                        console.log("Socket.io not loaded, switching to standalone mode");
-                                        activateStandaloneMode();
-                                        return;
-                                    }
-
-                                socket = io('http://localhost:5000', {
-                                reconnectionAttempts: 5,
-                                timeout: 8000,
-                                transports: ['websocket', 'polling']
-                                });
-
-                                socket.on('connect', () => {
-                                console.log("Connected to Server!");
-                                connectionStatus.className = "flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold shadow-buyGlow transition-all duration-300";
-                                connectionDot.className = "w-2.5 h-2.5 bg-emerald-500 rounded-full pulse-indicator-green shrink-0";
-                                connectionText.innerText = "متصل بالخادم";
-                                // Stop auto simulation if server is connected
-                                if (autoSimulateInterval) {
-                                    clearInterval(autoSimulateInterval);
-                                    autoSimulateInterval = null;
-                                }
-                                });
-
-                                socket.on('disconnect', () => {
-                                console.log("Disconnected from Server, switching to standalone.");
-                                activateStandaloneMode();
-                                });
-
-                                socket.on('connect_error', () => {
-                                console.log("Server unreachable, switching to standalone mode.");
-                                activateStandaloneMode();
-                                if (socket) { socket.disconnect(); socket = null; }
-                                });
-
-                                socket.on('new-signal', (data) => {
-                                console.log("New Signal received:", data);
-                                handleNewSignal(data);
-                                });
-
-                                } catch (err) {
-                                console.error("Socket.io initial connection failed", err);
-                                activateStandaloneMode();
-                                }
                                 }
 
                                 // Mock Signal Simulator (Creates realistic trading signals dynamically)
