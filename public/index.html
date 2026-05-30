@@ -672,49 +672,87 @@
 
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
-                    console.log(" HTML5 Audio playback prevented. Falling back to Web Audio API..."); // Synthesize
-            electronic sound with Web Audio API synthesizeSound(); }); } } // Web Audio Synthesizer (creates a premium
-            clean cyber chime) function synthesizeSound() { try { const AudioContext=window.AudioContext ||
-            window.webkitAudioContext; if (!AudioContext) return; const ctx=new AudioContext(); // Beep tone 1 (high
-            pitch start) const osc1=ctx.createOscillator(); const gain1=ctx.createGain(); osc1.type='sine' ;
+                    console.log(" HTML5 Audio playback prevented. Falling back to Web Audio API...");
+                    synthesizeSound();
+                });
+            }
+        }
+
+        // Web Audio Synthesizer (creates a premium clean cyber chime)
+        function synthesizeSound() {
+            try {
+                const AudioContext=window.AudioContext ||
+            window.webkitAudioContext; if (!AudioContext) return; const ctx=new AudioContext(); // Beep tone 1 (high pitch start) const osc1=ctx.createOscillator(); const gain1=ctx.createGain(); osc1.type='sine' ;
             osc1.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
             osc1.frequency.exponentialRampToValueAtTime(987.77, ctx.currentTime + 0.15); // B5
             gain1.gain.setValueAtTime(0.12, ctx.currentTime); gain1.gain.exponentialRampToValueAtTime(0.001,
             ctx.currentTime + 0.35); osc1.connect(gain1); gain1.connect(ctx.destination); // Beep tone 2 (warm sub tone)
             const osc2=ctx.createOscillator(); const gain2=ctx.createGain(); osc2.type='triangle' ;
-            osc2.frequency.setValueAtTime(329.63, ctx.currentTime); // E4 gain2.gain.setValueAtTime(0.08,
-            ctx.currentTime); gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+            osc2.frequency.setValueAtTime(329.63, ctx.currentTime); // E4
+            gain2.gain.setValueAtTime(0.08, ctx.currentTime); gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
             osc2.connect(gain2); gain2.connect(ctx.destination); osc1.start(); osc2.start(); osc1.stop(ctx.currentTime +
-            0.4); osc2.stop(ctx.currentTime + 0.4); } catch (e) { console.error("Web Audio synthesis failed", e); } } //
-            Web Audio Synthesizer for countdown warning beep function playCountdownBeep() { if (isMuted) return; try {
+            0.4); osc2.stop(ctx.currentTime + 0.4);
+            } catch (e) {
+                console.error("Web Audio synthesis failed", e);
+            }
+        }
+
+        // Web Audio Synthesizer for countdown warning beep
+        function playCountdownBeep() {
+            if (isMuted) return;
+            try {
             const AudioContext=window.AudioContext || window.webkitAudioContext; if (!AudioContext) return; const
             ctx=new AudioContext(); const osc=ctx.createOscillator(); const gain=ctx.createGain(); osc.type='sine' ;
-            osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 high beep gain.gain.setValueAtTime(0.08,
-            ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15); osc.connect(gain);
-            gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.15); } catch (e) {
-            console.error(e); } } // Web Audio Synthesizer for trade entry success chime function playEntryChime() { if
+            osc.frequency.setValueAtTime(880, ctx.currentTime); // A5 high beep
+            gain.gain.setValueAtTime(0.08, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.15); osc.connect(gain);
+            gain.connect(ctx.destination); osc.start(); osc.stop(ctx.currentTime + 0.15);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // Web Audio Synthesizer for trade entry success chime
+        function playEntryChime() {
+            if
             (isMuted) return; try { const AudioContext=window.AudioContext || window.webkitAudioContext; if
             (!AudioContext) return; const ctx=new AudioContext(); const osc1=ctx.createOscillator(); const
             gain1=ctx.createGain(); osc1.type='sine' ; osc1.frequency.setValueAtTime(523.25, ctx.currentTime); // C5
             osc1.frequency.exponentialRampToValueAtTime(1046.50, ctx.currentTime + 0.2); // C6
             gain1.gain.setValueAtTime(0.1, ctx.currentTime); gain1.gain.exponentialRampToValueAtTime(0.001,
             ctx.currentTime + 0.35); osc1.connect(gain1); gain1.connect(ctx.destination); osc1.start();
-            osc1.stop(ctx.currentTime + 0.35); } catch (e) { console.error(e); } } // Toggle Mute Audio function
-            toggleMute() { isMuted=!isMuted; const soundIcon=document.getElementById('soundIcon'); const
+            osc1.stop(ctx.currentTime + 0.35);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // Toggle Mute Audio function
+        function toggleMute() {
+            isMuted=!isMuted;
+            const soundIcon=document.getElementById('soundIcon');
+            const
             soundText=document.getElementById('soundText'); const soundToggleBtn=document.getElementById('soundToggle');
             if (isMuted) { soundIcon.className="fa-solid fa-volume-xmark text-rose-500 animate-none" ;
             soundText.innerText="الصوت: كتم" ; soundToggleBtn.classList.add('border-rose-900/30', 'bg-rose-950/10' ); }
             else { soundIcon.className="fa-solid fa-volume-high text-accentCyan" ; soundText.innerText="الصوت: نشط" ;
             soundToggleBtn.classList.remove('border-rose-900/30', 'bg-rose-950/10' ); // Play test sound
-            playAlertSound(); } } // Risk Calculator logic function calculateRisk() { const
+            playAlertSound();
+            }
+        }
+
+        // Risk Calculator logic
+        function calculateRisk() {
+            const
             balanceInput=document.getElementById('balanceInput'); const riskInput=document.getElementById('riskInput');
             const multiplierInput=document.getElementById('multiplierInput'); const
             payoutInput=document.getElementById('payoutInput'); const balance=parseFloat(balanceInput.value) || 0; const
             riskPercent=parseFloat(riskInput.value) || 0; const multiplier=parseFloat(multiplierInput.value) || 2.2;
             const payoutPercent=parseFloat(payoutInput.value) || 82; // Safe Trade amount (Step 1) const
             safeAmount=(balance * (riskPercent / 100));
-            document.getElementById('safeAmountOutput').innerText=`$${safeAmount.toFixed(2)}`; // Populate Martingale
-            Guide Table const tbody=document.getElementById('martingaleTableBody'); tbody.innerHTML='' ; let
+            document.getElementById('safeAmountOutput').innerText=`${safeAmount.toFixed(2)}`;
+
+            // Populate Martingale Guide Table
+            const tbody=document.getElementById('martingaleTableBody'); tbody.innerHTML='' ; let
             currentTradeAmount=safeAmount; let totalLossAccumulated=0; for (let step=1; step <=4; step++) { if (step> 1)
             {
             currentTradeAmount = currentTradeAmount * multiplier;
@@ -1002,8 +1040,8 @@
             activeIntervals[cardId] = setInterval(() => {
             const now = Date.now();
 
-            if (now < entryTime) { // State 1: Delay/Prepare countdown const remainingSeconds=Math.max(0,
-                Math.round((entryTime - now) / 1000)); const pct=(remainingSeconds / 60) * 100;
+            if (now < entryTime) { // State 1: Delay/Prepare countdown
+                const remainingSeconds=Math.max(0, Math.round((entryTime - now) / 1000)); const pct=(remainingSeconds / 60) * 100;
                 bar.style.width=`${pct}%`;
                 bar.className="h-full bg-gradient-to-l from-amber-500 to-yellow-400 rounded-full transition-all duration-1000"
                 ; countdownText.innerHTML=`<span class="text-amber-400 font-bold animate-pulse"><i
@@ -1013,13 +1051,14 @@
                 if (remainingSeconds <= 3 && remainingSeconds> 0) {
                     playCountdownBeep();
                     }
-                    } else if (now >= entryTime && now < expiryTime) { // State 2: Trade duration countdown const
-                        remainingSeconds=Math.max(0, Math.round((expiryTime - now) / 1000)); const pct=(remainingSeconds
+                    } else if (now >= entryTime && now < expiryTime) { // State 2: Trade duration countdown
+                        const remainingSeconds=Math.max(0, Math.round((expiryTime - now) / 1000)); const pct=(remainingSeconds
                         / durationSeconds) * 100; bar.style.width=`${pct}%`; bar.className=`h-full bg-gradient-to-l
                         ${isBuy ? 'from-emerald-500 to-teal-400' : 'from-rose-500 to-red-400' } rounded-full
-                        transition-all duration-1000`; // Flash success sound exactly at trade start if
-                        (remainingSeconds===durationSeconds) { playEntryChime(); } // Simulate price fluctuation and
-                        show live state (winning / losing) const fluctuation=(Math.random() - 0.5) * (entryPrice *
+                        transition-all duration-1000`; // Flash success sound exactly at trade start
+                        if (remainingSeconds===durationSeconds) { playEntryChime(); }
+                        // Simulate price fluctuation and show live state (winning / losing)
+                        const fluctuation=(Math.random() - 0.5) * (entryPrice *
                         0.0003); currentPrice=parseFloat((currentPrice + fluctuation).toFixed(precision)); if
                         (livePriceVal) { livePriceVal.innerText=currentPrice.toFixed(precision); const isWinning=isBuy ?
                         (currentPrice> entryPrice) : (currentPrice < entryPrice); if (isWinning) {
@@ -1079,11 +1118,9 @@
                                 btns.forEach(btn => {
                                 const el = document.getElementById(`filterBtn-${btn}`);
                                 if (btn === action) {
-                                el.className = "px-3 py-1 rounded bg-accentCyan/10 border border-accentCyan/50
-                                text-accentCyan font-bold transition";
+                                el.className = "px-3 py-1 rounded bg-accentCyan/10 border border-accentCyan/50 text-accentCyan font-bold transition";
                                 } else {
-                                el.className = "px-3 py-1 rounded bg-slate-900 text-slate-400 border border-slate-800
-                                hover:border-slate-700 transition";
+                                el.className = "px-3 py-1 rounded bg-slate-900 text-slate-400 border border-slate-800 hover:border-slate-700 transition";
                                 }
                                 });
 
@@ -1092,19 +1129,19 @@
 
                                 // Standalone Mode (No Backend Required)
                                 function connectSocket() {
-                                    const connectionStatus = document.getElementById('connectionStatus');
-                                    const connectionDot = document.getElementById('connectionDot');
-                                    const connectionText = document.getElementById('connectionText');
+                                const connectionStatus = document.getElementById('connectionStatus');
+                                const connectionDot = document.getElementById('connectionDot');
+                                const connectionText = document.getElementById('connectionText');
 
-                                    console.log("Activating Standalone Mode - Auto Signal Generation");
-                                    connectionStatus.className = "flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-xs font-semibold shadow-cyberGlow transition-all duration-300";
-                                    connectionDot.className = "w-2.5 h-2.5 bg-accentCyan rounded-full pulse-indicator-green shrink-0";
-                                    connectionText.innerText = "الخادم متصل (وضع مستقل)";
+                                console.log("Activating Standalone Mode - Auto Signal Generation");
+                                connectionStatus.className = "flex items-center gap-2 px-3 py-1.5 rounded-lg bg-accentCyan/10 border border-accentCyan/30 text-accentCyan text-xs font-semibold shadow-cyberGlow transition-all duration-300";
+                                connectionDot.className = "w-2.5 h-2.5 bg-accentCyan rounded-full pulse-indicator-green shrink-0";
+                                connectionText.innerText = "الخادم متصل (وضع مستقل)";
 
-                                    // Auto generate signals every 12 seconds
-                                    if (!autoSimulateInterval) {
-                                        autoSimulateInterval = setInterval(simulateSignal, 12000);
-                                    }
+                                // Auto generate signals every 12 seconds
+                                if (!autoSimulateInterval) {
+                                autoSimulateInterval = setInterval(simulateSignal, 12000);
+                                }
                                 }
 
                                 // Mock Signal Simulator (Creates realistic trading signals dynamically)
@@ -1146,24 +1183,24 @@
                                 // Custom Recommendation System
                                 const technicalAnalyses = {
                                 BUY: [
-                                "مؤشر القوة النسبية (RSI) يشير إلى تشبع بيعي عند مستوى 28، مع تقاطع إيجابي لمتوسط الحركة
-                                (MA). يُنصح بدخول صفقة شراء مع بداية الشمعة القادمة.",
-                                "تقاطع متوسطات الحركة الأسيّة (EMA 9/21) بشكل تصاعدي على إطار الدقيقة، مع ارتداد السعر
-                                من مستوى الدعم اليومي الأساسي.",
-                                "انعكاس إيجابي من الحد السفلي لمؤشر بولينجر باند (Bollinger Bands) مع زيادة واضحة في حجم
-                                تداولات الشراء (Buy Volume).",
-                                "تشكل نموذج شمعة 'المطرقة' (Hammer) الانعكاسية عند مستوى دعم قوي، مما يدعم الصعود الفوري
-                                المتوقع."
+                                `مؤشر القوة النسبية (RSI) يشير إلى تشبع بيعي عند مستوى 28، مع تقاطع إيجابي لمتوسط الحركة
+                                (MA). يُنصح بدخول صفقة شراء مع بداية الشمعة القادمة.`,
+                                `تقاطع متوسطات الحركة الأسيّة (EMA 9/21) بشكل تصاعدي على إطار الدقيقة، مع ارتداد السعر
+                                من مستوى الدعم اليومي الأساسي.`,
+                                `انعكاس إيجابي من الحد السفلي لمؤشر بولينجر باند (Bollinger Bands) مع زيادة واضحة في حجم
+                                تداولات الشراء (Buy Volume).`,
+                                `تشكل نموذج شمعة 'المطرقة' (Hammer) الانعكاسية عند مستوى دعم قوي، مما يدعم الصعود الفوري
+                                المتوقع.`
                                 ],
                                 SELL: [
-                                "مؤشر RSI يظهر تشبعاً شرائياً عند مستوى 73 مع بدء انحناء خطوط Stochastic لأسفل، مما يشير
-                                إلى هبوط وشيك للأسعار.",
-                                "تقاطع هبوطي لمتوسطات الحركة (EMA 9/21) مع كسر السعر لخط اتجاه صاعد فرعي، مما يؤكد سيطرة
-                                البائعين.",
-                                "ملامسة السعر للحد العلوي لمؤشر بولينجر باند وظهور شمعة ابتلاعية هبوطية (Bearish
-                                Engulfing) تدعم انخفاض السعر.",
-                                "فشل السعر في اختراق مستوى المقاومة الأساسي وتراجع الزخم الشرائي بشكل حاد وفقاً لمؤشر
-                                MACD."
+                                `مؤشر RSI يظهر تشبعاً شرائياً عند مستوى 73 مع بدء انحناء خطوط Stochastic لأسفل، مما يشير
+                                إلى هبوط وشيك للأسعار.`,
+                                `تقاطع هبوطي لمتوسطات الحركة (EMA 9/21) مع كسر السعر لخط اتجاه صاعد فرعي، مما يؤكد سيطرة
+                                البائعين.`,
+                                `ملامسة السعر للحد العلوي لمؤشر بولينجر باند وظهور شمعة ابتلاعية هبوطية (Bearish
+                                Engulfing) تدعم انخفاض السعر.`,
+                                `فشل السعر في اختراق مستوى المقاومة الأساسي وتراجع الزخم الشرائي بشكل حاد وفقاً لمؤشر
+                                MACD.`
                                 ]
                                 };
 
@@ -1436,8 +1473,8 @@
                                             bar.className=`h-full bg-gradient-to-l ${isBuy
                                             ? 'from-emerald-500 to-teal-400' : 'from-rose-500 to-red-400' } rounded-full
                                             transition-all duration-1000`; if (remainingSeconds===durationSeconds) {
-                                            playEntryChime(); } // Simulate price fluctuation and show live state
-                                            (winning / losing) const fluctuation=(Math.random() - 0.5) * (entryPrice *
+                                            playEntryChime(); } // Simulate price fluctuation and show live state (winning / losing)
+                                            const fluctuation=(Math.random() - 0.5) * (entryPrice *
                                             0.0003); currentPrice=parseFloat((currentPrice +
                                             fluctuation).toFixed(precision)); if (livePriceVal) {
                                             livePriceVal.innerText=currentPrice.toFixed(precision); const
@@ -1459,8 +1496,8 @@
                                                     صلاحية الإشارة</span>`;
 
                                                 // Determine outcome
-                                                const isWin = Math.random() < 0.78; // 78% win rate const
-                                                    offset=entryPrice * 0.0002; let exitPrice=0; if (isWin) {
+                                                const isWin = Math.random() < 0.78; // 78% win rate
+                                                    const offset=entryPrice * 0.0002; let exitPrice=0; if (isWin) {
                                                     exitPrice=isBuy ? (entryPrice + offset) : (entryPrice - offset); }
                                                     else { exitPrice=isBuy ? (entryPrice - offset) : (entryPrice +
                                                     offset); } exitPrice=parseFloat(exitPrice.toFixed(precision)); if
@@ -1468,8 +1505,7 @@
                                                     livePriceVal.innerText=exitPrice.toFixed(precision);
                                                     livePriceVal.className=isWin
                                                     ? "text-emerald-500 digital-font font-bold"
-                                                    : "text-rose-500 digital-font font-bold" ; } // Remove card from
-                                                    active UI list slightly after completion, then record it
+                                                    : "text-rose-500 digital-font font-bold" ; } // Remove card from active UI list slightly after completion, then record it
                                                     setTimeout(()=> {
                                                     const wrapper =
                                                     document.getElementById(`custom-card-wrapper-${cardId}`);
@@ -1551,17 +1587,12 @@
                                                     expiredSignals.forEach((sig) => {
                                                     const tr = document.createElement('tr');
                                                     const isWin = sig.outcome === 'WIN';
-                                                    const outcomeClass = isWin ? 'text-emerald-400 bg-emerald-500/10
-                                                    border-emerald-500/30 shadow-buyGlow' : 'text-rose-400
-                                                    bg-rose-500/10 border-rose-500/30 shadow-sellGlow';
-                                                    const actionClass = (sig.action.toUpperCase() === 'BUY' ||
-                                                    sig.action.toUpperCase() === 'CALL') ? 'text-emerald-400
-                                                    animate-pulse' : 'text-rose-400 animate-pulse';
+                                                    const outcomeClass = isWin ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30 shadow-buyGlow' : 'text-rose-400 bg-rose-500/10 border-rose-500/30 shadow-sellGlow';
+                                                    const actionClass = (sig.action.toUpperCase() === 'BUY' || sig.action.toUpperCase() === 'CALL') ? 'text-emerald-400 animate-pulse' : 'text-rose-400 animate-pulse';
                                                     const actionLabel = (sig.action.toUpperCase() === 'BUY' ||
                                                     sig.action.toUpperCase() === 'CALL') ? 'شراء (UP)' : 'بيع (DOWN)';
 
-                                                    tr.className = 'border-b border-slate-800/40 hover:bg-slate-800/10
-                                                    transition duration-150';
+                                                    tr.className = 'border-b border-slate-800/40 hover:bg-slate-800/10 transition duration-150';
                                                     tr.innerHTML = `
                                                     <td class="p-3 text-center digital-font text-slate-500">
                                                         ${sig.id.replace('mock_', '').replace('sig_', '').substring(0,
@@ -1601,6 +1632,8 @@
                                                     simulateSignal();
                                                     }, 1000);
                                                     });
-                                                    
+
+</script>
 </body>
+
 </html>
